@@ -1,0 +1,44 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>choose.png</file>
+        <file>level1.png</file>
+        <file>level2.png</file>
+        <file>level3.png</file>
+        <file>level4.png</file>
+        <file>level5.png</file>
+        <file>choose_btn.png</file>
+        <file>Main_background.jpg</file>
+        <file>bao.png</file>
+        <file>ning.png</file>
+        <file>an.png</file>
+        <file>aohema1.png</file>
+        <file>aohema2.png</file>
+        <file>aohema3.png</file>
+        <file>aohema4.png</file>
+        <file>coin.png</file>
+        <file>letter.png</file>
+        <file>lion_shield1.png</file>
+        <file>lion_shield2.png</file>
+        <file>redcrystal.png</file>
+        <file>mail.png</file>
+        <file>heart_gray.png</file>
+        <file>heart_red.png</file>
+        <file>succeed.png</file>
+        <file>again.png</file>
+        <file>back.png</file>
+        <file>fail.png</file>
+        <file>ground.png</file>
+    </qresource>
+    <qresource prefix="/videos">
+        <file>opening_animation.mp4</file>
+    </qresource>
+    <qresource prefix="/sound">
+        <file>coin.wav</file>
+        <file>fail.wav</file>
+        <file>jump.wav</file>
+        <file>letter.wav</file>
+        <file>mail.wav</file>
+        <file>win.wav</file>
+        <file>hurt.WAV</file>
+    </qresource>
+</RCC>
