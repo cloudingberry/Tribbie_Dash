@@ -32,7 +32,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
 
     // 信号连接处理各种物品
     connect(m_collisionManager, &CollisionManager::itemCollided, this, [=](GameItem* item) {
-        if (qobject_cast<GoldCoin*>(item)) {
+        if (qobject_cast<Coin*>(item)) {
             addCoin();
         } else if (qobject_cast<Letter*>(item)) {
             addLetter();

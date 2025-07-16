@@ -28,6 +28,7 @@
         <file>back.png</file>
         <file>fail.png</file>
         <file>ground.png</file>
+        <file>magnet.png</file>
     </qresource>
     <qresource prefix="/videos">
         <file>opening_animation.mp4</file>
@@ -40,5 +41,6 @@
         <file>mail.wav</file>
         <file>win.wav</file>
         <file>hurt.WAV</file>
+        <file>magnet.wav</file>
     </qresource>
 </RCC>
