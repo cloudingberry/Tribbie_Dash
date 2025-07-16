@@ -8,7 +8,9 @@
 #include "gameitem.h"
 #include "itemmanager.h"
 #include "collisionmanager.h"
+#include "lionshield.h"
 #include "resultwindow.h"
+#include "spearitem.h"
 
 class GameWindow : public QMainWindow {
     Q_OBJECT
@@ -87,4 +89,20 @@ private:
     const int GROUND_TILE_HEIGHT = 80;  // 高度固定
     int m_groundTileWidth = 0;          // 宽度按比例计算，构造函数中初始化
 
+    //长矛
+    bool m_isSpearActive = false;    // 是否激活冲刺
+    int m_spearCountdown = 0;        // 倒计时（帧数）
+
+    QSoundEffect* m_spearSound;
+    spearitem* m_spearItem;
+    LionShield* m_shielditem;
+
+    void activateSpear();            // 激活冲刺
+    void updateSpearState();         // 每帧更新冲刺状态
+
+    // 处理特殊碰撞（长矛vs盾牌）
+    void handleCustomCollision(GameItem* a, GameItem* b);
+
+    // 游戏状态管理
+    void setGamePaused(bool paused);  // 统一暂停/继续逻辑
 };

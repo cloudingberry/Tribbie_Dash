@@ -12,6 +12,7 @@
 #include "levelselectwindow.h"
 #include "resultwindow.h"
 #include <QTimer>
+#include "spearitem.h"
 
 GameWindow::GameWindow(int level, QWidget *parent)
     : QMainWindow(parent)
@@ -43,7 +44,19 @@ GameWindow::GameWindow(int level, QWidget *parent)
         }
     });
 
-    m_itemManager->start();
+
+
+    m_spearItem = new spearitem(this, GameItem::Track::Middle);
+    m_shielditem = new LionShield(this, GameItem::Track::Middle);
+
+    // 注册长矛和盾牌到碰撞系统
+    m_collisionManager->registerItem(m_spearItem);
+
+    // 连接自定义碰撞信号
+    connect(m_collisionManager, &CollisionManager::customCollision, this, &GameWindow::handleCustomCollision);
+}
+
+    itemManager->start();
     m_frameTimer.start();
 
     m_gameTimer = new QTimer(this);
@@ -377,3 +390,20 @@ void GameWindow::freezeGame() {
         m_isPaused = true;
     }
 }
+
+
+// 处理特殊碰撞类型（长矛vs盾牌）
+void GameWindow::handleCustomCollision(GameItem* a, GameItem* b) {
+    if ((a == m_spearItem && b == m_shielditem) ||
+        (b == m_spearItem && a == m_shielditem )) {
+        activateSpear();
+    }
+}
+
+// 保持原有冲刺激活逻辑不变
+void GameWindow::activateSpear() {
+    m_isSpearActive = true;
+    m_spearCountdown = 180;  // 3秒倒计时（60FPS）
+    m_spearSound->play();
+}
+

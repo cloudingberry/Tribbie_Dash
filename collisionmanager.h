@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QList>
 #include "gameitem.h"
+#include "spearitem.h"
 
 class CollisionManager : public QObject {
     Q_OBJECT
@@ -19,6 +20,8 @@ public:
     void checkCollisions(const QRect& playerRect);
 signals:
     void itemCollided(GameItem* item);
+    void customCollision(GameItem* a, GameItem* b);
+    void spearCollided(spearitem* spear);
 
 private:
     QList<GameItem*> m_items;
