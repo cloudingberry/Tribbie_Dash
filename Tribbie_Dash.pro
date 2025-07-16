@@ -16,6 +16,7 @@ SOURCES += \
     receiver.cpp \
     redcrystal.cpp \
     resultwindow.cpp \
+    speedpig.cpp \
     videowindow.cpp
 
 HEADERS += \
