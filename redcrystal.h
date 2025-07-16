@@ -1,6 +1,5 @@
 #pragma once
 #include "gameitem.h"
-#include <QSoundEffect>
 
 class RedCrystal : public GameItem {
     Q_OBJECT

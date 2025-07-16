@@ -1,8 +1,5 @@
 #pragma once
 #include "gameitem.h"
-#include <QSoundEffect>
-#include <QGraphicsOpacityEffect>
-
 
 class Letter : public GameItem {
     Q_OBJECT

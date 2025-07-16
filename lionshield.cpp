@@ -1,5 +1,4 @@
 #include "lionshield.h"
-#include <QSoundEffect>
 #include <QRandomGenerator>
 
 LionShield::LionShield(QWidget* parent, Track track)
@@ -13,14 +12,14 @@ LionShield::LionShield(QWidget* parent, Track track)
     int idx = QRandomGenerator::global()->bounded(images.size());
     setImage(images[idx]);
     setScaledSize(QSize(80, 80));
+
+    setSound("qrc:/sound/fail.wav", 1.0);
 }
 
 void LionShield::onCollideWithPlayer() {
     stop();
 
-    QSoundEffect* sound = new QSoundEffect(this);
-    sound->setSource(QUrl("qrc:/sound/fail.wav"));
-    sound->play();
+    m_soundEffect->play();
 
-    deleteLater();  // ✅ 或你可以改为添加动画
+    deleteLater();
 }

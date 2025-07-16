@@ -1,7 +1,5 @@
 #pragma once
 #include "gameitem.h"
-#include <QPropertyAnimation>
-#include <QSoundEffect>
 
 class GoldCoin : public GameItem {
     Q_OBJECT
@@ -11,6 +9,4 @@ public:
 public slots:
     void onCollideWithPlayer();
 
-private:
-    QSoundEffect* m_sound = nullptr;
 };

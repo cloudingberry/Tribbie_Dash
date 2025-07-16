@@ -1,6 +1,5 @@
 #include "gameitem.h"
 #include <QPixmap>
-#include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 
 GameItem::GameItem(QWidget* parent,
@@ -29,6 +28,10 @@ GameItem::GameItem(QWidget* parent,
     case BetweenTopMiddle:   trackY = (180 + 310 - itemH) / 2; break;
     case BetweenMiddleBottom:trackY = (310 + 440 - itemH) / 2; break;
     }
+    // 设置透明度效果
+    m_opacityEffect = new QGraphicsOpacityEffect(this);
+    m_opacityEffect->setOpacity(1.0);
+    setGraphicsEffect(m_opacityEffect);
 
     setGeometry(startX, trackY, scaledSize.width(), scaledSize.height());
     show();
@@ -87,6 +90,13 @@ void GameItem::pause() {
 
 void GameItem::resume() {
     m_isActive = true;
+}
+
+void GameItem::setSound(const QString& soundPath, qreal volume) {
+    if (!m_soundEffect)
+        m_soundEffect = new QSoundEffect(this);
+    m_soundEffect->setSource(QUrl(soundPath));
+    m_soundEffect->setVolume(volume);
 }
 
 

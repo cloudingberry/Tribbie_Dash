@@ -1,6 +1,5 @@
 #pragma once
 #include "gameitem.h"
-#include <QSoundEffect>
 
 class Receiver : public GameItem {
     Q_OBJECT
