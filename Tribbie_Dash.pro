@@ -32,6 +32,7 @@ HEADERS += \
     receiver.h \
     redcrystal.h \
     resultwindow.h \
+    speedpig.h \
     videowindow.h
 
 FORMS +=
