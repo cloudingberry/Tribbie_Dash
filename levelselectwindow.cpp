@@ -1,3 +1,4 @@
+// levelselectwindow.cpp
 #include "levelselectwindow.h"
 #include "gamewindow.h"
 #include <QPainter>
@@ -6,10 +7,13 @@
 #include <QScrollArea>
 #include <QPixmap>
 #include <QDebug>
+#include <QFile>
+#include <QTextStream>
 
 LevelSelectWindow::LevelSelectWindow(QWidget *parent)
     : QMainWindow(parent) {
     setFixedSize(1280, 720);
+    readDataFromFile();  // 读取文件数据
     setupUI();
 }
 
@@ -67,4 +71,32 @@ void LevelSelectWindow::setupUI() {
         height() - scrollArea->height() - 30
         );
     scrollArea->setStyleSheet("background: transparent; border: none;"); // 原始透明样式
+
+    // 添加金币和信件图标
+    m_coinIcon = new QLabel(this);
+    m_coinIcon->setPixmap(QPixmap(":/images/coin.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    m_coinIcon->setGeometry(20, 20, 40, 40);
+
+    m_coinText = new QLabel(QString("× %1").arg(m_coinCount), this);
+    m_coinText->setStyleSheet("color: white; font: bold 20px;");
+    m_coinText->setGeometry(70, 20, 60, 40);
+    m_coinText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+    m_letterIcon = new QLabel(this);
+    m_letterIcon->setPixmap(QPixmap(":/images/letter.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    m_letterIcon->setGeometry(20, 70, 40, 40);
+
+    m_letterText = new QLabel(QString("× %1").arg(m_letterCount), this);
+    m_letterText->setStyleSheet("color: white; font: bold 20px;");
+    m_letterText->setGeometry(70, 70, 60, 40);
+    m_letterText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+}
+
+void LevelSelectWindow::readDataFromFile() {
+    QFile file("data.txt");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        in >> m_coinCount >> m_letterCount;
+        file.close();
+    }
 }

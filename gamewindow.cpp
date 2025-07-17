@@ -1,3 +1,4 @@
+// gamewindow.cpp
 #include "gamewindow.h"
 #include "receiver.h"
 #include <QPixmap>
@@ -12,6 +13,8 @@
 #include "levelselectwindow.h"
 #include "resultwindow.h"
 #include <QTimer>
+#include <QFile>
+#include <QTextStream>
 
 GameWindow::GameWindow(int level, QWidget *parent)
     : QMainWindow(parent)
@@ -19,6 +22,8 @@ GameWindow::GameWindow(int level, QWidget *parent)
     Q_UNUSED(level);
     setFixedSize(1280, 720);
     setFocusPolicy(Qt::StrongFocus);
+
+    readDataFromFile();  // 读取文件数据
 
     int baseY = height() * 0.25;
     int spacing = height() * 0.18;
@@ -76,7 +81,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
     m_coinIcon->setPixmap(QPixmap(":/images/coin.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     m_coinIcon->setGeometry(width() / 2 + 200, 20, 40, 40);
 
-    m_coinText = new QLabel("× 0", this);
+    m_coinText = new QLabel(QString("× %1").arg(m_coinCount), this);
     m_coinText->setStyleSheet("color: white; font: bold 20px;");
     m_coinText->setGeometry(width() / 2 + 250, 20, 60, 40);
     m_coinText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -85,7 +90,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
     m_letterIcon->setPixmap(QPixmap(":/images/letter.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     m_letterIcon->setGeometry(width() / 2 + 430, 20, 40, 40);
 
-    m_letterText = new QLabel("× 0", this);
+    m_letterText = new QLabel(QString("× %1").arg(m_letterCount), this);
     m_letterText->setStyleSheet("color: white; font: bold 20px;");
     m_letterText->setGeometry(width() / 2 + 480, 20, 60, 40);
     m_letterText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -137,6 +142,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
 
     connect(this, &GameWindow::gameFinished, this, [=]() {
         togglePause();
+        writeDataToFile();  // 写入文件数据
         auto* winWindow = new ResultWindow(true, m_coinCount, m_letterCount, m_lives, this);
         winWindow->move((width() - winWindow->width()) / 2, (height() - winWindow->height()) / 2);
         winWindow->show();
@@ -179,6 +185,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
 
     connect(this, &GameWindow::gameFinished, this, [=]() {
         freezeGame();
+        writeDataToFile();  // 写入文件数据
         auto* winWindow = new ResultWindow(true, m_coinCount, m_letterCount, m_lives, this);
         winWindow->move((width() - winWindow->width()) / 2, (height() - winWindow->height()) / 2);
         winWindow->show();
@@ -195,9 +202,6 @@ GameWindow::GameWindow(int level, QWidget *parent)
             close();  // ✅ 就是这里
         });
     });
-
-
-
 }
 
 GameWindow::~GameWindow() {
@@ -267,10 +271,116 @@ void GameWindow::switchCharacter(int type) {
     m_currentType = type;
 }
 
+void GameWindow::playJumpSound() {
+    QSoundEffect* jumpSound = new QSoundEffect(this);
+    jumpSound->setSource(QUrl("qrc:/sound/jump.wav"));
+    jumpSound->setVolume(0.5);
+    jumpSound->play();
+}
+
+void GameWindow::processJump() {
+    if (!m_isJumping) return;
+
+    m_verticalVelocity += GRAVITY;
+    int newY = m_character->y() + static_cast<int>(m_verticalVelocity);
+
+    // 着陆检测
+    int groundY = m_trackYPositions[2] - Y_OFFSET;
+    if (newY >= groundY) {
+        newY = groundY;
+        m_isJumping = false;
+        m_verticalVelocity = 0;
+    }
+
+    m_character->move(m_character->x(), newY);
+}
+
+void GameWindow::addCoin() {
+    m_coinCount++;
+    m_coinText->setText(QString("× %1").arg(m_coinCount));
+
+    // 播放收集音效
+    QSoundEffect* coinSound = new QSoundEffect(this);
+    coinSound->setSource(QUrl("qrc:/sound/coin.wav"));
+    coinSound->setVolume(0.7);
+    coinSound->play();
+}
+
+void GameWindow::addLetter() {
+    m_letterCount++;
+    m_letterText->setText(QString("× %1").arg(m_letterCount));
+
+    // 播放收集音效
+    QSoundEffect* letterSound = new QSoundEffect(this);
+    letterSound->setSource(QUrl("qrc:/sound/letter.wav"));
+    letterSound->setVolume(0.7);
+    letterSound->play();
+}
+
+void GameWindow::loseLife() {
+    if (m_lives <= 0) return;
+
+    m_lives--;
+
+    // 更新生命显示
+    if (!m_lifeIcons.isEmpty()) {
+        delete m_lifeIcons.takeLast();
+    }
+
+    // 播放受伤音效
+    QSoundEffect* hitSound = new QSoundEffect(this);
+    hitSound->setSource(QUrl("qrc:/sound/hit.wav"));
+    hitSound->setVolume(0.8);
+    hitSound->play();
+
+    if (m_lives <= 0) {
+        emit gameFailed();
+    }
+}
+
+void GameWindow::togglePause() {
+    m_isPaused = !m_isPaused;
+    if (m_isPaused) {
+        m_gameTimer->stop();
+    } else {
+        m_gameTimer->start(16);
+    }
+}
+
+void GameWindow::readDataFromFile() {
+    QFile file("data.txt");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        in >> m_coinCount >> m_letterCount;
+        file.close();
+    }
+}
+
+void GameWindow::writeDataToFile() {
+    QFile file("data.txt");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << m_coinCount << " " << m_letterCount;
+        file.close();
+    }
+}
+
+void GameWindow::freezeGame() {
+    m_gameTimer->stop();
+    for (auto* item : findChildren<GameItem*>()) {
+        item->setVisible(false);
+    }
+}
+
+void GameWindow::closeEvent(QCloseEvent* event) {
+    emit closed();
+    QMainWindow::closeEvent(event);
+}
+
 void GameWindow::keyPressEvent(QKeyEvent* event) {
     switch (event->key()) {
     case Qt::Key_Space:
-        if (m_currentType == AN) return;
+        if (m_currentType == AN) return; // 角色AN不能跳跃
 
         if (!m_isJumping) {
             m_verticalVelocity = FIRST_JUMP_FORCE;
@@ -290,90 +400,18 @@ void GameWindow::keyPressEvent(QKeyEvent* event) {
     case Qt::Key_2: switchCharacter(NING); break;
     case Qt::Key_3: switchCharacter(AN); break;
     case Qt::Key_S: togglePause(); break;
-    case Qt::Key_Escape: close(); break;
     }
 }
 
-void GameWindow::playJumpSound() {
-    QSoundEffect* sound = new QSoundEffect(this);
-    sound->setSource(QUrl("qrc:/sound/jump.wav"));
-    sound->setVolume(0.8);
-    sound->play();
-}
+void GameWindow::paintEvent(QPaintEvent* event) {
+    Q_UNUSED(event); // 添加这一行，标记参数未使用
 
-void GameWindow::processJump() {
-    if (m_currentType == AN) return;
-
-    if (m_isJumping) {
-        m_verticalVelocity += GRAVITY;
-        int newY = m_character->y() + static_cast<int>(m_verticalVelocity);
-
-        int targetY = m_trackYPositions[m_currentType - 1] - Y_OFFSET;
-
-        if (newY <= m_trackYPositions[0] - Y_OFFSET) {
-            newY = m_trackYPositions[0] - Y_OFFSET;
-            m_verticalVelocity = 0;
-        } else if (newY >= targetY) {
-            newY = targetY;
-            m_verticalVelocity = 0;
-            m_isJumping = false;
-            m_canDoubleJump = true;
-        }
-
-        m_character->move(m_character->x(), newY);
-    }
-}
-
-void GameWindow::paintEvent(QPaintEvent*) {
     QPainter painter(this);
-    painter.drawPixmap(rect(), QPixmap(":/images/aohema1.png"));
-}
-
-void GameWindow::closeEvent(QCloseEvent* event) {
-    emit closed();
-    QMainWindow::closeEvent(event);
-}
-
-void GameWindow::addCoin() {
-    m_coinCount++;
-    m_coinText->setText(QString("× %1").arg(m_coinCount));
-}
-
-void GameWindow::addLetter() {
-    m_letterCount++;
-    m_letterText->setText(QString("× %1").arg(m_letterCount));
-}
-
-void GameWindow::loseLife() {
-    if (m_lives <= 0) return;
-
-    m_lives--;
-    if (m_lives < m_lifeIcons.size()) {
-        m_lifeIcons[m_lives]->setPixmap(QPixmap(":/images/heart_gray.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    }
-
-    if (m_lives == 0) {
-        emit gameFailed();
-    }
-}
-
-void GameWindow::togglePause() {
-    m_isPaused = !m_isPaused;
-
-    if (m_isPaused) {
-        m_gameTimer->stop();
-        m_itemManager->pauseItems();
+    QPixmap bg(":/images/game_background.png"); // 假设游戏背景图片资源名为game_background.png
+    if (!bg.isNull()) {
+        painter.drawPixmap(rect(), bg);
     } else {
-        m_frameTimer.restart(); // 避免物品突进
-        m_gameTimer->start(16);
-        m_itemManager->resumeItems();
-    }
-}
-
-void GameWindow::freezeGame() {
-    if (!m_isPaused) {
-        m_gameTimer->stop();
-        m_itemManager->pauseItems();
-        m_isPaused = true;
+        // 如果背景图片加载失败，可以绘制一个默认背景
+        painter.fillRect(rect(), Qt::black);
     }
 }

@@ -1,3 +1,4 @@
+// gamewindow.h
 #pragma once
 
 #include <QMainWindow>
@@ -41,6 +42,8 @@ private:
     void addLetter();
     void loseLife();
     void togglePause();
+    void readDataFromFile();  // 读取文件数据
+    void writeDataToFile();   // 写入文件数据
 
     QLabel* m_character;
     QList<int> m_trackYPositions;
