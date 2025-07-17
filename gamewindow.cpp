@@ -13,6 +13,7 @@
 #include "resultwindow.h"
 #include <QTimer>
 
+
 GameWindow::GameWindow(int level, QWidget *parent)
     : QMainWindow(parent)
 {
@@ -195,9 +196,6 @@ GameWindow::GameWindow(int level, QWidget *parent)
             close();  // ✅ 就是这里
         });
     });
-
-
-
 }
 
 GameWindow::~GameWindow() {
@@ -290,48 +288,7 @@ void GameWindow::keyPressEvent(QKeyEvent* event) {
     case Qt::Key_2: switchCharacter(NING); break;
     case Qt::Key_3: switchCharacter(AN); break;
     case Qt::Key_S: togglePause(); break;
-    case Qt::Key_Escape: close(); break;
     }
-}
-
-void GameWindow::playJumpSound() {
-    QSoundEffect* sound = new QSoundEffect(this);
-    sound->setSource(QUrl("qrc:/sound/jump.wav"));
-    sound->setVolume(0.8);
-    sound->play();
-}
-
-void GameWindow::processJump() {
-    if (m_currentType == AN) return;
-
-    if (m_isJumping) {
-        m_verticalVelocity += GRAVITY;
-        int newY = m_character->y() + static_cast<int>(m_verticalVelocity);
-
-        int targetY = m_trackYPositions[m_currentType - 1] - Y_OFFSET;
-
-        if (newY <= m_trackYPositions[0] - Y_OFFSET) {
-            newY = m_trackYPositions[0] - Y_OFFSET;
-            m_verticalVelocity = 0;
-        } else if (newY >= targetY) {
-            newY = targetY;
-            m_verticalVelocity = 0;
-            m_isJumping = false;
-            m_canDoubleJump = true;
-        }
-
-        m_character->move(m_character->x(), newY);
-    }
-}
-
-void GameWindow::paintEvent(QPaintEvent*) {
-    QPainter painter(this);
-    painter.drawPixmap(rect(), QPixmap(":/images/aohema1.png"));
-}
-
-void GameWindow::closeEvent(QCloseEvent* event) {
-    emit closed();
-    QMainWindow::closeEvent(event);
 }
 
 void GameWindow::addCoin() {
@@ -345,35 +302,83 @@ void GameWindow::addLetter() {
 }
 
 void GameWindow::loseLife() {
-    if (m_lives <= 0) return;
-
-    m_lives--;
-    if (m_lives < m_lifeIcons.size()) {
-        m_lifeIcons[m_lives]->setPixmap(QPixmap(":/images/heart_gray.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    }
-
-    if (m_lives == 0) {
-        emit gameFailed();
+    if (m_lives > 0) {
+        m_lives--;
+        if (!m_lifeIcons.isEmpty()) {
+            m_lifeIcons.last()->hide();
+            m_lifeIcons.removeLast();
+        }
+        if (m_lives == 0) {
+            emit gameFailed();
+        }
     }
 }
 
 void GameWindow::togglePause() {
     m_isPaused = !m_isPaused;
-
     if (m_isPaused) {
         m_gameTimer->stop();
         m_itemManager->pauseItems();
     } else {
-        m_frameTimer.restart(); // 避免物品突进
         m_gameTimer->start(16);
         m_itemManager->resumeItems();
     }
 }
 
-void GameWindow::freezeGame() {
-    if (!m_isPaused) {
-        m_gameTimer->stop();
-        m_itemManager->pauseItems();
-        m_isPaused = true;
+void GameWindow::playJumpSound() {
+    QSoundEffect* jumpSound = new QSoundEffect(this);
+    jumpSound->setSource(QUrl("qrc:/sound/jump.wav"));
+    jumpSound->setVolume(0.8);
+    jumpSound->play();
+}
+
+void GameWindow::processJump() {
+    if (m_isJumping) {
+        m_verticalVelocity += GRAVITY;
+        int newY = m_character->y() + static_cast<int>(m_verticalVelocity);
+
+        // 落地检测
+        int groundTop = m_trackYPositions[2] - Y_OFFSET;
+        if (newY >= groundTop) {
+            newY = groundTop;
+            m_isJumping = false;
+            m_verticalVelocity = 0;
+        }
+
+        m_character->move(m_character->x(), newY);
     }
+}
+
+void GameWindow::freezeGame() {
+    // 实现冻结游戏的逻辑，例如停止定时器、暂停物品移动等
+    m_gameTimer->stop();
+    m_itemManager->stop();
+    for (auto* item : findChildren<GameItem*>()) {
+        item->stop();
+    }
+}
+
+void GameWindow::onSpeedBoostActivated(int duration, float speedMultiplier) {
+    // 实现加速效果的逻辑
+    // 例如，设置一个定时器，在 duration 时间内提高物品移动速度
+    QTimer::singleShot(duration, [this]() {
+        // 恢复正常速度的逻辑
+    });
+    // 提高物品速度的逻辑
+    m_itemManager->increaseSpeed(speedMultiplier);
+}
+
+void GameWindow::paintEvent(QPaintEvent* event) {
+    // 调用父类的 paintEvent 以确保默认绘制操作正常进行
+    QMainWindow::paintEvent(event);
+    // 在这里添加自定义的绘制逻辑
+    QPainter painter(this);
+    // 例如，绘制一些额外的图形或文本
+}
+
+void GameWindow::closeEvent(QCloseEvent* event) {
+    // 调用父类的 closeEvent 以确保默认关闭操作正常进行
+    QMainWindow::closeEvent(event);
+    // 在这里添加关闭窗口时的额外逻辑，例如保存游戏状态
+    emit closed();
 }

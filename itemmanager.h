@@ -1,3 +1,4 @@
+// itemmanager.h
 #pragma once
 
 #include "gameitem.h"
@@ -20,6 +21,8 @@ public:
     void pauseItems();
     void resumeItems();
 
+    // 新增：提高速度的方法声明
+    void increaseSpeed(int increment);
 
 private slots:
     void spawnNextPattern();

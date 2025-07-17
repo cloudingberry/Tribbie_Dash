@@ -5,6 +5,7 @@
 #include "redcrystal.h"
 #include "letter.h"
 #include "receiver.h"
+#include "speedpig.h" // 新增头文件包含
 #include <QRandomGenerator>
 
 ItemPatternGenerator::ItemPatternGenerator(QObject* parent, GameWindow* gameWindow)
@@ -27,7 +28,8 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
     if (m_letterCount < 3) {
         candidateTypes << 0 << 0 << 1 << 1 << 2 << 2;
         if (spawnCounter > 5) {
-            candidateTypes << 3 << 4;
+            // 原代码只有 1 次 SpeedPig，改为 3 次，提高概率
+            candidateTypes << 3 << 4 << 5 << 5 << 5; // 新增 3 次 5 代表生成 SpeedPig
         }
     } else {
         m_goalGenerated = true;
@@ -50,6 +52,7 @@ QList<GameItem*> ItemPatternGenerator::generatePattern(int type) {
     case 2: return generateShieldLine();
     case 3: return generateLetterWithTrap();
     case 4: return generateLetterGuard();
+    case 5: return generateSpeedPig(); // 新增 case
     default: return {};
     }
 }
@@ -143,5 +146,17 @@ QList<GameItem*> ItemPatternGenerator::generateGoal() {
     auto* receiver = new Receiver(m_gameWindow, track);
     receiver->move(m_gameWindow->width() + 50, m_gameWindow->trackY(track) - receiver->height() / 2);
     items.append(receiver);
+    return items;
+}
+
+QList<GameItem*> ItemPatternGenerator::generateSpeedPig() {
+    QList<GameItem*> items;
+    auto track = static_cast<GameItem::Track>(QRandomGenerator::global()->bounded(3));
+    int baseX = m_gameWindow->width() + 50;
+
+    auto* speedPig = new SpeedPig(m_gameWindow, track);
+    speedPig->move(baseX, m_gameWindow->trackY(track) - speedPig->height() / 2);
+    items.append(speedPig);
+
     return items;
 }

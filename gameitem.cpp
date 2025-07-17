@@ -1,3 +1,4 @@
+// gameitem.cpp
 #include "gameitem.h"
 #include <QPixmap>
 #include <QPropertyAnimation>
@@ -99,4 +100,10 @@ void GameItem::setSound(const QString& soundPath, qreal volume) {
     m_soundEffect->setVolume(volume);
 }
 
-
+// 新增：实现调整速度的方法
+void GameItem::setSpeed(int speed) {
+    m_speed = speed;
+}
+int GameItem::getSpeed() const {
+    return m_speed;
+}

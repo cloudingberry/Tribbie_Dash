@@ -1,3 +1,4 @@
+// itemmanager.cpp
 #include "itemmanager.h"
 #include "gamewindow.h"
 #include "itempatterngenerator.h"
@@ -61,3 +62,13 @@ void ItemManager::resumeItems() {
     }
 }
 
+// 新增：实现提高速度的方法
+
+void ItemManager::increaseSpeed(int increment) {
+    for (GameItem* item : std::as_const(m_items)) {
+        if (item) {
+            int newSpeed = item->getSpeed() + increment;
+            item->setSpeed(newSpeed);
+        }
+    }
+}
