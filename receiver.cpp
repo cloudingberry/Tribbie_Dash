@@ -4,7 +4,7 @@ Receiver::Receiver(QWidget* parent, Track track)
     : GameItem(parent, "", track)
 {
     setImage(":/images/mail.png");
-    setScaledSize(QSize(100, 100));
+    setScaledSize(QSize(130, 130));
     setSound("qrc:/sound/mail.wav", 1.0);
 }
 

@@ -11,18 +11,17 @@ ItemPatternGenerator::ItemPatternGenerator(QObject* parent, GameWindow* gameWind
     : QObject(parent), m_gameWindow(gameWindow) {}
 
 QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
+
     qint64 now = QDateTime::currentMSecsSinceEpoch();
 
-    if (now - m_lastSpawnTime < m_minIntervalMs)
-        return {};
+    if (now - m_lastSpawnTime < m_minIntervalMs)    return {};
+    if (m_goalGenerated)    return {};
 
-    if (m_goalGenerated) return {};
     m_lastSpawnTime = now;
 
     static int spawnCounter = 0;
     spawnCounter++;
 
-    QVector<int> candidateTypes;
 
     if (m_letterCount < 3) {
         candidateTypes << 0 << 0 << 1 << 1 << 2 << 2;
@@ -43,6 +42,12 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
     return generatePattern(chosenType);
 }
 
+/*根据编号返回具体套路
+    0 → 直线金币
+    1 → 弧形金币
+    2 → 直线盾牌
+    3 → 信件陷阱
+    4 → 信件守卫*/
 QList<GameItem*> ItemPatternGenerator::generatePattern(int type) {
     switch (type) {
     case 0: return generateStraightCoins();
@@ -59,7 +64,7 @@ QList<GameItem*> ItemPatternGenerator::generateStraightCoins() {
     auto track = static_cast<GameItem::Track>(QRandomGenerator::global()->bounded(3));
     int baseX = m_gameWindow->width() + 50;
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 5; ++i) {
         auto* coin = new GoldCoin(m_gameWindow, track);
         coin->move(baseX + i * 90, m_gameWindow->trackY(track) - coin->height() / 2);
         items.append(coin);
@@ -69,18 +74,33 @@ QList<GameItem*> ItemPatternGenerator::generateStraightCoins() {
 
 QList<GameItem*> ItemPatternGenerator::generateArcCoins() {
     QList<GameItem*> items;
-    GameItem::Track tracks[3] = { GameItem::Bottom, GameItem::Middle, GameItem::Top };
-    int baseX = m_gameWindow->width() + 50;
-    int offset = QRandomGenerator::global()->bounded(2) == 0 ? 1 : -1;
 
-    for (int i = 0; i < 3; ++i) {
-        auto track = tracks[(i + 3 + offset) % 3];
+    struct CoinPoint {
+        int dx;    // 相对 baseX 的偏移量
+        int track; // 轨道编号（0~4）
+    };
+
+    // 定义弧形金币的布置
+    QVector<QVector<CoinPoint>> arcPatterns = {
+        { {0,2}, {19,4}, {43,1}, {75,3}, {150,0}, {225,3}, {257,1}, {281,4}, {300,2} }, // 弧线1
+        { {0,2}, {48,4}, {104,1}, {160,4}, {208,2} }                    // 弧线2
+    };
+
+    const QVector<CoinPoint>& chosen = arcPatterns[QRandomGenerator::global()->bounded(arcPatterns.size())];
+
+    int baseX = m_gameWindow->width() + 50;
+
+    for (const CoinPoint& pt : chosen) {
+        auto track = static_cast<GameItem::Track>(pt.track);
         auto* coin = new GoldCoin(m_gameWindow, track);
-        coin->move(baseX + i * 100, m_gameWindow->trackY(track) - coin->height() / 2);
+        coin->move(baseX + pt.dx, m_gameWindow->trackY(track) - coin->height() / 2);
         items.append(coin);
     }
+
     return items;
 }
+
+
 
 QList<GameItem*> ItemPatternGenerator::generateShieldLine() {
     QList<GameItem*> items;
@@ -112,25 +132,26 @@ QList<GameItem*> ItemPatternGenerator::generateLetterWithTrap() {
     return items;
 }
 
+
 QList<GameItem*> ItemPatternGenerator::generateLetterGuard() {
     QList<GameItem*> items;
     GameItem::Track center = static_cast<GameItem::Track>(QRandomGenerator::global()->bounded(3));
     int baseX = m_gameWindow->width() + 50;
 
     auto* letter = new Letter(m_gameWindow, center);
-    letter->move(baseX + 90, m_gameWindow->trackY(center) - letter->height() / 2);
+    letter->move(baseX , m_gameWindow->trackY(center) - letter->height() / 2);
     items.append(letter);
     ++m_letterCount;
 
     if (center != GameItem::Top) {
         auto* shield = new LionShield(m_gameWindow, static_cast<GameItem::Track>(center - 1));
-        shield->move(baseX, m_gameWindow->trackY(static_cast<GameItem::Track>(center - 1)) - shield->height() / 2);
+        shield->move(baseX , m_gameWindow->trackY(static_cast<GameItem::Track>(center - 1)) - shield->height() / 2);
         items.append(shield);
     }
 
     if (center != GameItem::Bottom) {
         auto* trap = new RedCrystal(m_gameWindow, static_cast<GameItem::Track>(center + 1));
-        trap->move(baseX + 180, m_gameWindow->trackY(static_cast<GameItem::Track>(center + 1)) - trap->height() / 2);
+        trap->move(baseX , m_gameWindow->trackY(static_cast<GameItem::Track>(center + 1)) - trap->height() / 2);
         items.append(trap);
     }
 

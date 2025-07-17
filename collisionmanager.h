@@ -17,9 +17,10 @@ public:
 
     // 执行碰撞检测
     void checkCollisions(const QRect& playerRect);
+
 signals:
-    void itemCollided(GameItem* item);
+    void itemCollided(GameItem* item); // 发出：某个物品被撞到信号
 
 private:
-    QList<GameItem*> m_items;
+    QList<GameItem*> m_items; // 当前所有需要检测的物品列表
 };

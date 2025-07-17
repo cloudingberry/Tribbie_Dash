@@ -17,7 +17,7 @@ void CollisionManager::checkCollisions(const QRect& playerBox) {
         if (item->getHitBox().intersects(playerBox)) {
             item->setActive(false);
 
-            // ⚠️ 先发信号，再异步调用物品自己的处理（避免立即 deleteLater 后访问 item）
+            // 先发信号，再异步调用物品自己的处理（避免立即 deleteLater 后访问 item）
             emit itemCollided(item);
             QMetaObject::invokeMethod(item, "onCollideWithPlayer", Qt::QueuedConnection);
         }
@@ -28,3 +28,8 @@ void CollisionManager::checkCollisions(const QRect& playerBox) {
                                  [](GameItem* item) { return !item || !item->isActive(); }),
                   m_items.end());
 }
+
+void CollisionManager::clearItems() {
+    m_items.clear();
+}
+//好像没用上？

@@ -11,6 +11,7 @@ ItemManager::ItemManager(QObject* parent, GameWindow* gameWindow)
     m_patternGenerator = new ItemPatternGenerator(this, gameWindow);
 
     m_spawnTimer = new QTimer(this);
+
     connect(m_spawnTimer, &QTimer::timeout, this, &ItemManager::spawnNextPattern);
 }
 
@@ -23,9 +24,10 @@ void ItemManager::stop() {
 }
 
 void ItemManager::spawnNextPattern() {
-    const int minGap = 300;
-    int maxRight = 0;
+    const int minGap = 200;
+    int maxRight = 0;  
 
+    //找出最右边的物品的 x + width 值
     for (auto* item : m_gameWindow->findChildren<GameItem*>()) {
         if (item && item->isActive()) {
             int rightEdge = item->x() + item->width();
@@ -33,7 +35,7 @@ void ItemManager::spawnNextPattern() {
         }
     }
 
-    // 若最右边的物体还在距右边 <300px 以内，则不生成新套路
+    // 若最右边的物体还在距右边 <200px 以内，则不生成新套路
     if (maxRight > m_gameWindow->width() - minGap) {
         return;
     }

@@ -81,7 +81,7 @@ void GameItem::stop() {
 }
 
 QRect GameItem::getHitBox() const {
-    return geometry().adjusted(30, 30, -30, -30);  // 缩小碰撞区域
+    return geometry().adjusted(20, 20, -20, -20);  // 缩小碰撞区域
 }
 
 void GameItem::pause() {

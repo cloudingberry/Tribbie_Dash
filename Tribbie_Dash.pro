@@ -2,6 +2,7 @@ QT += core gui widgets multimedia multimediawidgets  # 添加多媒体模块
 CONFIG += c++17
 
 SOURCES += \
+    character.cpp \
     collisionmanager.cpp \
     gameitem.cpp \
     gamewindow.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
     videowindow.cpp
 
 HEADERS += \
+    character.h \
     collisionmanager.h \
     gameitem.h \
     gamewindow.h \

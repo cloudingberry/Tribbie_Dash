@@ -24,7 +24,6 @@ GameWindow::GameWindow(int level, QWidget *parent)
     int spacing = height() * 0.18;
     m_trackYPositions = { baseY, baseY + spacing, baseY + 2 * spacing };
 
-    m_character = new QLabel(this);
     initCharacter();
 
     m_itemManager = new ItemManager(this, this);
@@ -62,12 +61,11 @@ GameWindow::GameWindow(int level, QWidget *parent)
             ground->move(newX, ground->y());
         }
 
-
         for (auto* item : findChildren<GameItem*>()) {
             item->updatePosition(deltaSec);
         }
 
-        m_collisionManager->checkCollisions(m_character->geometry());
+        m_collisionManager->checkCollisions(m_character->hitBox());
     });
     m_gameTimer->start(16);
 
@@ -101,7 +99,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
 
     // ========== 初始化地面 ==========
     // 地面视觉高度调低一点
-    int groundTop = m_trackYPositions[2] + CHARACTER_SIZE / 2 - Y_OFFSET + 35;
+    int groundTop = m_trackYPositions[2] + m_character->height() / 2 - Y_OFFSET + 35;
 
     // 调整地面尺寸
     const int GROUND_TILE_HEIGHT = 100;
@@ -122,38 +120,8 @@ GameWindow::GameWindow(int level, QWidget *parent)
 
     // 连接游戏结束信号
     connect(this, &GameWindow::gameFailed, this, [=]() {
-        togglePause();
-        auto* failWindow = new ResultWindow(false, m_coinCount, m_letterCount, m_lives, this);
-        failWindow->move((width() - failWindow->width()) / 2, (height() - failWindow->height()) / 2);
-        failWindow->show();
-
-        connect(failWindow, &ResultWindow::retryRequested, this, [=]() {
-            // 重启逻辑，待实现
-        });
-        connect(failWindow, &ResultWindow::backToMenuRequested, this, [=]() {
-            // 返回菜单逻辑，待实现
-        });
-    });
-
-    connect(this, &GameWindow::gameFinished, this, [=]() {
-        togglePause();
-        auto* winWindow = new ResultWindow(true, m_coinCount, m_letterCount, m_lives, this);
-        winWindow->move((width() - winWindow->width()) / 2, (height() - winWindow->height()) / 2);
-        winWindow->show();
-
-        connect(winWindow, &ResultWindow::retryRequested, this, [=]() {
-            // 重启逻辑，待实现
-        });
-        connect(winWindow, &ResultWindow::backToMenuRequested, this, [=]() {
-            // 返回菜单逻辑，待实现
-        });
-    });
-
-
-    connect(this, &GameWindow::gameFailed, this, [=]() {
         freezeGame();
 
-        // ✅ 播放失败音效
         QSoundEffect* failSound = new QSoundEffect(this);
         failSound->setSource(QUrl("qrc:/sound/fail.wav"));
         failSound->setVolume(0.8);
@@ -172,10 +140,9 @@ GameWindow::GameWindow(int level, QWidget *parent)
         });
 
         connect(failWindow, &ResultWindow::backToMenuRequested, this, [=]() {
-            close();  // 不再新建 LevelSelectWindow
+            close();
         });
     });
-
 
     connect(this, &GameWindow::gameFinished, this, [=]() {
         freezeGame();
@@ -186,18 +153,15 @@ GameWindow::GameWindow(int level, QWidget *parent)
         connect(winWindow, &ResultWindow::retryRequested, this, [=]() {
             close();
             QTimer::singleShot(100, [=]() {
-                GameWindow* newGame = new GameWindow(1);  // 替换为当前关卡
+                GameWindow* newGame = new GameWindow(1);
                 newGame->show();
             });
         });
 
         connect(winWindow, &ResultWindow::backToMenuRequested, this, [=]() {
-            close();  // ✅ 就是这里
+            close();
         });
     });
-
-
-
 }
 
 GameWindow::~GameWindow() {
@@ -227,101 +191,12 @@ int GameWindow::trackY(GameItem::Track track) const {
 }
 
 void GameWindow::initCharacter() {
-    QPixmap pixmap(":/images/bao.png");
-    if (!pixmap.isNull()) {
-        pixmap = pixmap.scaled(CHARACTER_SIZE, CHARACTER_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        m_character->setPixmap(pixmap);
-    }
-
-    m_character->setGeometry(
-        width() / 2 - CHARACTER_SIZE / 2,
-        m_trackYPositions[2] - Y_OFFSET,
-        CHARACTER_SIZE, CHARACTER_SIZE
-        );
-    m_currentType = BAO;
+    m_character = new Character(this);
+    m_character->init(Character::BAO, m_trackYPositions, Y_OFFSET);
 }
 
 void GameWindow::switchCharacter(int type) {
-    if (type < AN || type > BAO || type == m_currentType) return;
-
-    m_isJumping = false;
-    m_verticalVelocity = 0;
-
-    int trackIndex = type - 1;
-    m_character->move(
-        width() / 2 - CHARACTER_SIZE / 2,
-        m_trackYPositions[trackIndex] - Y_OFFSET
-        );
-
-    QString imgPath;
-    if (type == AN) imgPath = ":/images/an.png";
-    else if (type == NING) imgPath = ":/images/ning.png";
-    else imgPath = ":/images/bao.png";
-
-    QPixmap pixmap(imgPath);
-    if (!pixmap.isNull()) {
-        pixmap = pixmap.scaled(CHARACTER_SIZE, CHARACTER_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        m_character->setPixmap(pixmap);
-    }
-
-    m_currentType = type;
-}
-
-void GameWindow::keyPressEvent(QKeyEvent* event) {
-    switch (event->key()) {
-    case Qt::Key_Space:
-        if (m_currentType == AN) return;
-
-        if (!m_isJumping) {
-            m_verticalVelocity = FIRST_JUMP_FORCE;
-            m_isJumping = true;
-            m_canDoubleJump = true;
-            playJumpSound();
-        } else if (m_canDoubleJump && m_currentType == BAO) {
-            m_verticalVelocity = SECOND_JUMP_FORCE;
-            m_canDoubleJump = false;
-            playJumpSound();
-        }
-
-        m_jumpTimer.start();
-        break;
-
-    case Qt::Key_1: switchCharacter(BAO); break;
-    case Qt::Key_2: switchCharacter(NING); break;
-    case Qt::Key_3: switchCharacter(AN); break;
-    case Qt::Key_S: togglePause(); break;
-    case Qt::Key_Escape: close(); break;
-    }
-}
-
-void GameWindow::playJumpSound() {
-    QSoundEffect* sound = new QSoundEffect(this);
-    sound->setSource(QUrl("qrc:/sound/jump.wav"));
-    sound->setVolume(0.8);
-    sound->play();
-}
-
-void GameWindow::processJump() {
-    if (m_currentType == AN) return;
-
-    if (m_isJumping) {
-        m_verticalVelocity += GRAVITY;
-        int newY = m_character->y() + static_cast<int>(m_verticalVelocity);
-
-        int targetY = m_trackYPositions[m_currentType - 1] - Y_OFFSET;
-
-        if (newY <= m_trackYPositions[0] - Y_OFFSET) {
-            newY = m_trackYPositions[0] - Y_OFFSET;
-            m_verticalVelocity = 0;
-        } else if (newY >= targetY) {
-            newY = targetY;
-            m_verticalVelocity = 0;
-            m_isJumping = false;
-            m_canDoubleJump = true;
-        }
-
-        m_character->move(m_character->x(), newY);
-    }
+    m_character->switchType(static_cast<Character::Type>(type));
 }
 
 void GameWindow::paintEvent(QPaintEvent*) {
@@ -375,5 +250,33 @@ void GameWindow::freezeGame() {
         m_gameTimer->stop();
         m_itemManager->pauseItems();
         m_isPaused = true;
+    }
+}
+
+void GameWindow::processJump() {
+    qreal deltaSec = m_frameTimer.restart() / 1000.0;
+    m_character->processJump(deltaSec);
+}
+
+void GameWindow::keyPressEvent(QKeyEvent* event) {
+    switch (event->key()) {
+    case Qt::Key_Space:
+        m_character->startJump();
+        break;
+    case Qt::Key_1:
+        switchCharacter(Character::BAO);
+        break;
+    case Qt::Key_2:
+        switchCharacter(Character::NING);
+        break;
+    case Qt::Key_3:
+        switchCharacter(Character::AN);
+        break;
+    case Qt::Key_S:
+        togglePause();
+        break;
+    case Qt::Key_Escape:
+        close();
+        break;
     }
 }
