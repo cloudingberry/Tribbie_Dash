@@ -10,7 +10,7 @@ class GameWindow;
 class ItemPatternGenerator : public QObject {
     Q_OBJECT
 public:
-    explicit ItemPatternGenerator(QObject* parent, GameWindow* gameWindow);
+    explicit ItemPatternGenerator(QObject* parent, GameWindow* gameWindow, int level);
 
     QList<GameItem*> generateNextPattern(); // “外部接口”：被 ItemManager 调用，生成下一组物品
 
@@ -22,6 +22,8 @@ private:
     qint64 m_lastSpawnTime = 0;       // 上一次生成物品的时间
     qint64 m_minIntervalMs = 1500;    // 两次生成的最小间隔
     QVector<int> candidateTypes;      //存储当前可以选择生成的套路编号，并调整概率
+
+    int m_level = 1;
 
     QList<GameItem*> generatePattern(int type);// 直接生成输入的编号的套路的函数
 

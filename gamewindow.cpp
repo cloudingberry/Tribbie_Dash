@@ -16,9 +16,8 @@
 #include <QTimer>
 
 GameWindow::GameWindow(int level, QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), m_level(level)
 {
-    Q_UNUSED(level);
     setFixedSize(1280, 720);
     setFocusPolicy(Qt::StrongFocus);
 
@@ -28,7 +27,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
 
     initCharacter();
 
-    m_itemManager = new ItemManager(this, this);
+    m_itemManager = new ItemManager(this, this, m_level);
     m_collisionManager = new CollisionManager(this);
 
     // 信号连接处理各种物品

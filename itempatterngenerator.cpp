@@ -10,8 +10,8 @@
 #include "speedpig.h"
 #include <QRandomGenerator>
 
-ItemPatternGenerator::ItemPatternGenerator(QObject* parent, GameWindow* gameWindow)
-    : QObject(parent), m_gameWindow(gameWindow) {}
+ItemPatternGenerator::ItemPatternGenerator(QObject* parent, GameWindow* gameWindow, int level)
+    : QObject(parent), m_gameWindow(gameWindow) ,m_level(level){}
 
 QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
 
@@ -25,17 +25,32 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
     static int spawnCounter = 0;
     spawnCounter++;
 
-
     if (m_letterCount < 3) {
-        candidateTypes << 0 << 0 << 1 << 2 << 2 << 2 << 5 << 6 << 7 << 7 << 7 << 7;
-        //candidateTypes << 1 << 1 << 1 << 1 << 1 << 1 << 7 << 7 << 7 << 7 << 7 << 7;
-        if (spawnCounter > 5) {
+        switch(m_level){
+        case 1: // 新手入门4件
+            candidateTypes << 0 << 0 << 0 << 1 << 1 << 1 << 2 << 2 << 2;
+            break;
+        case 2: // 上手长矛
+            candidateTypes << 0 << 1 << 2 << 2 << 2 << 2 << 2 << 5 << 5 << 5 << 5 << 5;
+            break;
+        case 3: //  上手加速小猪
+            candidateTypes << 0 << 0 << 1 << 1 << 2 << 2 << 2 << 7 << 7 << 7 << 7 << 7;
+            break;
+        case 4: // 上手吸铁石
+            candidateTypes << 0 << 0 << 0 << 1 << 1 << 1 << 2 << 2 << 6 << 6 << 6 << 6 << 6;
+            break;
+        case 5:
+            candidateTypes << 0 << 0 << 1 << 1 << 2 << 2 << 5 << 5 << 6 << 6 << 7 << 7;
+            break;
+        }
+        if (spawnCounter > 10) {
             candidateTypes << 3 << 4;
         }
     } else {
         m_goalGenerated = true;
         return generateGoal();
     }
+
 
     int chosenType;
     do {
@@ -44,6 +59,7 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
 
     m_lastPatternIndex = chosenType;
     return generatePattern(chosenType);
+
 }
 
 /*根据编号返回具体套路
@@ -51,7 +67,10 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
     1 → 弧形金币
     2 → 直线盾牌
     3 → 信件陷阱
-    4 → 信件守卫*/
+    4 → 信件守卫
+    5 ->长矛
+    6 ->吸铁石
+    7 ->加速猪*/
 QList<GameItem*> ItemPatternGenerator::generatePattern(int type) {
     switch (type) {
     case 0: return generateStraightCoins();

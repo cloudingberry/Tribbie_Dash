@@ -5,10 +5,10 @@
 
 #include <algorithm>  // for std::max
 
-ItemManager::ItemManager(QObject* parent, GameWindow* gameWindow)
-    : QObject(parent), m_gameWindow(gameWindow)
+ItemManager::ItemManager(QObject* parent, GameWindow* gameWindow, int level)
+    : QObject(parent), m_gameWindow(gameWindow), m_level(level)
 {
-    m_patternGenerator = new ItemPatternGenerator(this, gameWindow);
+    m_patternGenerator = new ItemPatternGenerator(this, gameWindow, m_level);
 
     m_spawnTimer = new QTimer(this);
 

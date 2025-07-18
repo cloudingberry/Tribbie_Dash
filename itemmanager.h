@@ -13,7 +13,7 @@ class ItemManager : public QObject {
     Q_OBJECT
 
 public:
-    explicit ItemManager(QObject* parent, GameWindow* gameWindow);
+    explicit ItemManager(QObject* parent, GameWindow* gameWindow, int level);
 
     void start();
     void stop();
@@ -30,4 +30,6 @@ private:
     QTimer* m_spawnTimer;                    // 定时器，控制生成节奏
     QList<GameItem*> m_items;                // 当前已生成的所有物品
     ItemPatternGenerator* m_patternGenerator;// 套路生成器
+
+    int m_level = 1;
 };

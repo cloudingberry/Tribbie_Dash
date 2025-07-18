@@ -89,4 +89,6 @@ private:
     QTimer* m_speedUpCountdownTimer;
     int m_speedUpRemainingTime = 0;
 
+    int m_level = 1;
+
 };
