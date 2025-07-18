@@ -29,7 +29,7 @@ public:
     bool isActive() const;
 
     //运动函数
-    void updatePosition(qreal deltaSec);
+    virtual void updatePosition(qreal deltaSec);
     void stop();
     void pause();
     void resume();

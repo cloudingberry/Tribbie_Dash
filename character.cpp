@@ -130,3 +130,17 @@ void Character::endDash() {
     emit dashEnded();
 }
 
+
+void Character::activateMagnetMode(int durationSec) {
+    m_magnetMode = true;
+    emit magnetModeChanged(true, durationSec);
+
+    m_magnetTimer.stop();
+    m_magnetTimer.setSingleShot(true);
+    connect(&m_magnetTimer, &QTimer::timeout, this, [=]() {
+        m_magnetMode = false;
+        emit magnetModeChanged(false, 0);
+    });
+    m_magnetTimer.start(durationSec * 1000);
+}
+

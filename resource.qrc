@@ -30,6 +30,8 @@
         <file>redcrystal.png</file>
         <file>spear.png</file>
         <file>succeed.png</file>
+        <file>magnet.png</file>
+        <file>speedpig.png</file>
     </qresource>
     <qresource prefix="/sound">
         <file>coin.wav</file>

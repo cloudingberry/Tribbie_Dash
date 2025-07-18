@@ -12,6 +12,7 @@ SOURCES += \
     letter.cpp \
     levelselectwindow.cpp \
     lionshield.cpp \
+    magnet.cpp \
     main.cpp \
     mainwindow.cpp \
     receiver.cpp \
@@ -31,6 +32,7 @@ HEADERS += \
     letter.h \
     levelselectwindow.h \
     lionshield.h \
+    magnet.h \
     mainwindow.h \
     receiver.h \
     redcrystal.h \

@@ -22,6 +22,8 @@ public:
 
     void freezeGame();      // 游戏冻结函数，暂停所有内容
 
+    Character* getCharacter() const { return m_character; }
+
 signals:
     void gameFinished();
     void gameFailed();
@@ -76,4 +78,11 @@ private:
     QLabel* m_spearTimerLabel;
     QTimer* m_spearCountdownTimer;
     int m_spearRemainingTime = 0;
+
+    QLabel* m_magnetIcon;
+    QLabel* m_magnetTimerLabel;
+    QTimer* m_magnetCountdownTimer;
+    int m_magnetRemainingTime = 0;
+
+
 };

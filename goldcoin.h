@@ -6,7 +6,9 @@ class GoldCoin : public GameItem {
 public:
     explicit GoldCoin(QWidget* parent, Track track);
 
+    void updatePosition(qreal delta) override;
+
 public slots:
-    void onCollideWithPlayer();
+    void onCollideWithPlayer() ;
 
 };

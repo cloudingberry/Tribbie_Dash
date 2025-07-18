@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QSoundEffect>
 #include <QElapsedTimer>
+#include <QTimer>
 
 class Character : public QLabel {
     Q_OBJECT
@@ -33,7 +34,8 @@ public:
     bool isDashing() const {return m_isDashing; };       // 是否在冲刺
     void triggerDash();                                  // 发起冲刺
 
-    bool hasmagnet() const { return m_hasmagnet; }       // 是否持有吸铁石
+    void activateMagnetMode(int durationSec);            //启动磁力模式
+    bool isMagnetActive() const { return m_magnetMode; } //判断是否处于磁力模式
 
     QRect hitBox() const;
 
@@ -43,6 +45,7 @@ signals:
     void spearModeChanged(bool active, int durationSec);  // 用于通知GameWindow更新UI
     void dashStarted();
     void dashEnded();
+    void magnetModeChanged(bool active, int duration);
 
 private slots:
     void endSpearMode();
@@ -67,11 +70,11 @@ private:
     const qreal FIRST_JUMP_FORCE = -36.0;    // 第一跳初速度
     const qreal SECOND_JUMP_FORCE = -54.0;   // 二段跳速度更强
 
-     bool m_inSpearMode = false;
+    bool m_inSpearMode = false;
     bool m_isDashing = false;
     QTimer* m_spearTimer;
     QTimer* m_dashTimer;
 
-
-    bool m_hasmagnet = false;
+    bool m_magnetMode = false;
+    QTimer m_magnetTimer;
 };

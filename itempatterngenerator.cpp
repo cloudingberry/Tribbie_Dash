@@ -6,6 +6,7 @@
 #include "letter.h"
 #include "receiver.h"
 #include "spear.h"
+#include "magnet.h"
 #include <QRandomGenerator>
 
 ItemPatternGenerator::ItemPatternGenerator(QObject* parent, GameWindow* gameWindow)
@@ -25,7 +26,7 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
 
 
     if (m_letterCount < 3) {
-        candidateTypes << 0 << 0 << 1 << 1 << 2 << 2 << 5 << 5 << 5;
+        candidateTypes << 0 << 0 << 1 << 1 << 2 << 2 << 5 << 6 << 6 << 6 << 6 << 6;
         if (spawnCounter > 5) {
             candidateTypes << 3 << 4 << 5;
         }
@@ -57,6 +58,7 @@ QList<GameItem*> ItemPatternGenerator::generatePattern(int type) {
     case 3: return generateLetterWithTrap();
     case 4: return generateLetterGuard();
     case 5: return generateSpear();
+    case 6: return generateMagnet();
     default: return {};
     }
 }
@@ -175,5 +177,14 @@ QList<GameItem*> ItemPatternGenerator::generateSpear() {
     auto* spear = new Spear(m_gameWindow, track);
     spear->move(m_gameWindow->width() + 50, m_gameWindow->trackY(track) - spear->height() / 2);
     items.append(spear);
+    return items;
+}
+
+QList<GameItem*> ItemPatternGenerator::generateMagnet() {
+    QList<GameItem*> items;
+    auto track = static_cast<GameItem::Track>(QRandomGenerator::global()->bounded(3));
+    auto* magnet = new Magnet(m_gameWindow, track);
+    magnet->move(m_gameWindow->width() + 50, m_gameWindow->trackY(track) - magnet->height() / 2);
+    items.append(magnet);
     return items;
 }

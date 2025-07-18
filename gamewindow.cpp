@@ -11,6 +11,7 @@
 #include "lionshield.h"
 #include "resultwindow.h"
 #include "spear.h"
+#include "magnet.h"
 #include <QTimer>
 
 GameWindow::GameWindow(int level, QWidget *parent)
@@ -43,7 +44,10 @@ GameWindow::GameWindow(int level, QWidget *parent)
             }
         }else if (qobject_cast<Spear*>(item)) {
             m_character->activateSpearMode(20);
+        }else if (qobject_cast<Magnet*>(item)) {
+            m_character->activateMagnetMode(15);
         }
+
     });
 
     m_itemManager->start();
@@ -212,6 +216,38 @@ GameWindow::GameWindow(int level, QWidget *parent)
             m_spearCountdownTimer->start(1000);
         } else {
             m_spearCountdownTimer->stop();
+        }
+    });
+
+    // Magnet UI 初始化
+    m_magnetIcon = new QLabel(this);
+    m_magnetIcon->setPixmap(QPixmap(":/images/magnet.png").scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    m_magnetIcon->setGeometry(270, height() - 110, 90, 90);
+    m_magnetIcon->hide();
+
+    m_magnetTimerLabel = new QLabel(this);
+    m_magnetTimerLabel->setStyleSheet("color: white; font: bold 20px;");
+    m_magnetTimerLabel->setGeometry(370, height() - 90, 40, 40);
+    m_magnetTimerLabel->hide();
+
+    m_magnetCountdownTimer = new QTimer(this);
+    connect(m_magnetCountdownTimer, &QTimer::timeout, this, [=]() {
+        m_magnetRemainingTime--;
+        if (m_magnetRemainingTime <= 0) {
+            m_magnetCountdownTimer->stop();
+        }
+        m_magnetTimerLabel->setText(QString("%1s").arg(m_magnetRemainingTime));
+    });
+
+    connect(m_character, &Character::magnetModeChanged, this, [=](bool active, int duration) {
+        m_magnetIcon->setVisible(active);
+        m_magnetTimerLabel->setVisible(active);
+        if (active) {
+            m_magnetRemainingTime = duration;
+            m_magnetTimerLabel->setText(QString("%1s").arg(m_magnetRemainingTime));
+            m_magnetCountdownTimer->start(1000);
+        } else {
+            m_magnetCountdownTimer->stop();
         }
     });
 
