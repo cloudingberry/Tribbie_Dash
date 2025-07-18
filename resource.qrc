@@ -44,6 +44,7 @@
         <file>Spear_Dash.WAV</file>
         <file>spear_pickup.WAV</file>
         <file>win.wav</file>
+        <file>speedpig.WAV</file>
     </qresource>
     <qresource prefix="/video">
         <file>opening_animation.mp4</file>

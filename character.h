@@ -37,6 +37,9 @@ public:
     void activateMagnetMode(int durationSec);            //启动磁力模式
     bool isMagnetActive() const { return m_magnetMode; } //判断是否处于磁力模式
 
+    void activateSpeedUpMode(int seconds);
+    bool isSpeedUpActive() const { return m_speedUpActive; }
+
     QRect hitBox() const;
 
 signals:
@@ -46,6 +49,7 @@ signals:
     void dashStarted();
     void dashEnded();
     void magnetModeChanged(bool active, int duration);
+    void speedUpModeChanged(bool active, int duration);
 
 private slots:
     void endSpearMode();
@@ -61,14 +65,15 @@ private:
 
     bool m_isJumping = false;
     bool m_canDoubleJump = false;
+    qreal jumpSpeedMultiplier() const;
 
     qreal m_verticalVelocity = 0.0; // 跳跃时竖直速度
     QElapsedTimer m_jumpTimer;      // 跳跃计时器
 
-    const int CHARACTER_SIZE = 120;          // 角色图片宽高
-    const qreal GRAVITY = 4.0;               // 每秒速度变化
-    const qreal FIRST_JUMP_FORCE = -36.0;    // 第一跳初速度
-    const qreal SECOND_JUMP_FORCE = -54.0;   // 二段跳速度更强
+    const int CHARACTER_SIZE = 120;                       // 角色图片宽高
+    const qreal GRAVITY[2] = {4.0 , 12.0};                 // 每秒速度变化
+    const qreal FIRST_JUMP_FORCE[2] = {-36.0 , -54.0};    // 第一跳初速度
+    const qreal SECOND_JUMP_FORCE[2] = {-54.0, -108};     // 二段跳速度更强
 
     bool m_inSpearMode = false;
     bool m_isDashing = false;
@@ -77,4 +82,9 @@ private:
 
     bool m_magnetMode = false;
     QTimer m_magnetTimer;
+
+    bool m_speedUpActive = false;
+    QTimer* m_speedUpTimer = nullptr;
+    int m_speedUpDuration = 0;
+
 };

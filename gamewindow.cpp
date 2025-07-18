@@ -12,6 +12,7 @@
 #include "resultwindow.h"
 #include "spear.h"
 #include "magnet.h"
+#include <speedpig.h>
 #include <QTimer>
 
 GameWindow::GameWindow(int level, QWidget *parent)
@@ -46,8 +47,9 @@ GameWindow::GameWindow(int level, QWidget *parent)
             m_character->activateSpearMode(20);
         }else if (qobject_cast<Magnet*>(item)) {
             m_character->activateMagnetMode(15);
+        }else if (qobject_cast<SpeedPig*>(item)) {
+            m_character->activateSpeedUpMode(8);
         }
-
     });
 
     m_itemManager->start();
@@ -62,7 +64,14 @@ GameWindow::GameWindow(int level, QWidget *parent)
         processJump();
 
         // 冲刺状态下速度加倍
-        qreal speedMultiplier = m_character->isDashing() ? 4.5 : 1.0;
+        qreal speedMultiplier = 1.0;
+
+        if (m_character->isDashing())
+            speedMultiplier *= 4.5;
+
+        if (m_character->isSpeedUpActive())
+            speedMultiplier *= 2.0;
+
         int currentGroundSpeed = static_cast<int>(GROUND_SPEED * speedMultiplier);
 
         // 地面移动
@@ -227,7 +236,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
 
     m_magnetTimerLabel = new QLabel(this);
     m_magnetTimerLabel->setStyleSheet("color: white; font: bold 20px;");
-    m_magnetTimerLabel->setGeometry(370, height() - 90, 40, 40);
+    m_magnetTimerLabel->setGeometry(380, height() - 70, 40, 40);
     m_magnetTimerLabel->hide();
 
     m_magnetCountdownTimer = new QTimer(this);
@@ -250,6 +259,38 @@ GameWindow::GameWindow(int level, QWidget *parent)
             m_magnetCountdownTimer->stop();
         }
     });
+
+    // 加速小猪UI初始化
+    m_speedUpIcon = new QLabel(this);
+    m_speedUpIcon->setPixmap(QPixmap(":/images/speedpig.png").scaled(90, 90));
+    m_speedUpIcon->setGeometry(450, height() - 110, 90, 90);  // 放在长矛右侧
+    m_speedUpIcon->hide();
+
+    m_speedUpTimerLabel = new QLabel(this);
+    m_speedUpTimerLabel->setStyleSheet("color: white; font-size: 20px;");
+    m_speedUpTimerLabel->setGeometry(550, height() - 70, 40, 40);  // 紧随其右
+    m_speedUpTimerLabel->hide();
+
+    m_speedUpCountdownTimer = new QTimer(this);
+    connect(m_speedUpCountdownTimer, &QTimer::timeout, this, [=]() {
+        m_speedUpRemainingTime--;
+        if (m_speedUpRemainingTime <= 0) {
+            m_speedUpCountdownTimer->stop();
+        }
+        m_speedUpTimerLabel->setText(QString("%1s").arg(m_speedUpRemainingTime));
+    });
+    connect(m_character, &Character::speedUpModeChanged, this, [=](bool active, int duration) {
+        m_speedUpIcon->setVisible(active);
+        m_speedUpTimerLabel->setVisible(active);
+        if (active) {
+            m_speedUpRemainingTime = duration;
+            m_speedUpTimerLabel->setText(QString("%1s").arg(m_speedUpRemainingTime));
+            m_speedUpCountdownTimer->start(1000);  // 每秒刷新
+        } else {
+            m_speedUpCountdownTimer->stop();
+        }
+    });
+
 
 }
 

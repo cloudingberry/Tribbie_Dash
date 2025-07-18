@@ -19,6 +19,7 @@ SOURCES += \
     redcrystal.cpp \
     resultwindow.cpp \
     spear.cpp \
+    speedpig.cpp \
     videowindow.cpp
 
 HEADERS += \
@@ -38,6 +39,7 @@ HEADERS += \
     redcrystal.h \
     resultwindow.h \
     spear.h \
+    speedpig.h \
     videowindow.h
 
 FORMS +=

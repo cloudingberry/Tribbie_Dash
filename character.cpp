@@ -11,6 +11,14 @@ Character::Character(QWidget* parent) : QLabel(parent) {
     m_dashTimer = new QTimer(this);
     m_dashTimer->setSingleShot(true);
     connect(m_dashTimer, &QTimer::timeout, this, &Character::endDash);
+
+    m_speedUpTimer = new QTimer(this);
+    connect(m_speedUpTimer, &QTimer::timeout, this, [=]() {
+        m_speedUpActive = false;
+        emit speedUpModeChanged(false, 0);
+        m_speedUpTimer->stop();
+    });
+
 }
 
 void Character::init(Type type, const QList<int>& trackYPositions, int yOffset) {
@@ -52,7 +60,7 @@ void Character::processJump(qreal deltaSec) {
     if (m_currentType == AN) return;
 
     if (m_isJumping) {
-        m_verticalVelocity += GRAVITY;
+        m_verticalVelocity += GRAVITY[m_speedUpActive];
         int newY = y() + static_cast<int>(m_verticalVelocity);
 
         int targetY = m_trackYPositions[m_currentType - 1] - m_yOffset;
@@ -75,12 +83,12 @@ void Character::startJump() {
     if (m_currentType == AN) return;
 
     if (!m_isJumping) {
-        m_verticalVelocity = FIRST_JUMP_FORCE;
+        m_verticalVelocity = FIRST_JUMP_FORCE[m_speedUpActive];
         m_isJumping = true;
         m_canDoubleJump = true;
         playJumpSound();
     } else if (m_canDoubleJump && m_currentType == BAO) {
-        m_verticalVelocity = SECOND_JUMP_FORCE;
+        m_verticalVelocity = SECOND_JUMP_FORCE[m_speedUpActive];
         m_canDoubleJump = false;
         playJumpSound();
     }
@@ -143,4 +151,15 @@ void Character::activateMagnetMode(int durationSec) {
     });
     m_magnetTimer.start(durationSec * 1000);
 }
+
+void Character::activateSpeedUpMode(int seconds) {
+    m_speedUpActive = true;
+    m_speedUpDuration = seconds;
+    emit speedUpModeChanged(true, seconds);
+    m_speedUpTimer->start(seconds * 1000);
+}
+
+
+
+
 

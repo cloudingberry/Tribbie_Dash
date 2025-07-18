@@ -32,6 +32,7 @@ private:
     QList<GameItem*> generateLetterGuard();
     QList<GameItem*> generateSpear();
     QList<GameItem*> generateMagnet();
+    QList<GameItem*> generateSpeedPig();
 
     QList<GameItem*> generateGoal();
 };

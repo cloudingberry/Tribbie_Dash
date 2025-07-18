@@ -7,6 +7,7 @@
 #include "receiver.h"
 #include "spear.h"
 #include "magnet.h"
+#include "speedpig.h"
 #include <QRandomGenerator>
 
 ItemPatternGenerator::ItemPatternGenerator(QObject* parent, GameWindow* gameWindow)
@@ -26,9 +27,10 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
 
 
     if (m_letterCount < 3) {
-        candidateTypes << 0 << 0 << 1 << 1 << 2 << 2 << 5 << 6 << 6 << 6 << 6 << 6;
+        candidateTypes << 0 << 0 << 1 << 2 << 2 << 2 << 5 << 6 << 7 << 7 << 7 << 7;
+        //candidateTypes << 1 << 1 << 1 << 1 << 1 << 1 << 7 << 7 << 7 << 7 << 7 << 7;
         if (spawnCounter > 5) {
-            candidateTypes << 3 << 4 << 5;
+            candidateTypes << 3 << 4;
         }
     } else {
         m_goalGenerated = true;
@@ -59,6 +61,7 @@ QList<GameItem*> ItemPatternGenerator::generatePattern(int type) {
     case 4: return generateLetterGuard();
     case 5: return generateSpear();
     case 6: return generateMagnet();
+    case 7: return generateSpeedPig();
     default: return {};
     }
 }
@@ -186,5 +189,14 @@ QList<GameItem*> ItemPatternGenerator::generateMagnet() {
     auto* magnet = new Magnet(m_gameWindow, track);
     magnet->move(m_gameWindow->width() + 50, m_gameWindow->trackY(track) - magnet->height() / 2);
     items.append(magnet);
+    return items;
+}
+
+QList<GameItem*> ItemPatternGenerator::generateSpeedPig() {
+    QList<GameItem*> items;
+    auto track = static_cast<GameItem::Track>(QRandomGenerator::global()->bounded(3));
+    auto* speedpig = new SpeedPig(m_gameWindow, track);
+    speedpig->move(m_gameWindow->width() + 50, m_gameWindow->trackY(track) - speedpig->height() / 2);
+    items.append(speedpig);
     return items;
 }

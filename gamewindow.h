@@ -84,5 +84,9 @@ private:
     QTimer* m_magnetCountdownTimer;
     int m_magnetRemainingTime = 0;
 
+    QLabel* m_speedUpIcon = nullptr;
+    QLabel* m_speedUpTimerLabel = nullptr;
+    QTimer* m_speedUpCountdownTimer;
+    int m_speedUpRemainingTime = 0;
 
 };
