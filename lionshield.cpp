@@ -19,7 +19,5 @@ LionShield::LionShield(QWidget* parent, Track track)
 void LionShield::onCollideWithPlayer() {
     stop();
 
-    m_soundEffect->play();
-
     deleteLater();
 }

@@ -8,20 +8,19 @@
 #include "gameitem.h"
 #include "itemmanager.h"
 #include "collisionmanager.h"
-#include "resultwindow.h"
 #include "character.h"
 
-    class GameWindow : public QMainWindow {
+class GameWindow : public QMainWindow {
     Q_OBJECT
 
 public:
     explicit GameWindow(int level, QWidget *parent = nullptr);
     ~GameWindow();
 
-    void registerGameItem(GameItem* item);
-    int trackY(GameItem::Track track) const;
+    void registerGameItem(GameItem* item);    // 注册物品到碰撞检测器中，并检查是否是 Receiver（终点）
+    int trackY(GameItem::Track track) const;  // 获取某一轨道的 Y 坐标，用于放置物品或角色
 
-    void freezeGame();
+    void freezeGame();      // 游戏冻结函数，暂停所有内容
 
 signals:
     void gameFinished();
@@ -29,17 +28,19 @@ signals:
     void closed();
 
 protected:
-    void paintEvent(QPaintEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;   // 重写绘图事件（绘制背景）
     void closeEvent(QCloseEvent* event) override;
-    void keyPressEvent(QKeyEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;  // 键盘事件（跳跃/切换角色/暂停等操作）
 
 private:
     void initCharacter();
     void switchCharacter(int type);
     void processJump();
+
     void addCoin();
     void addLetter();
     void loseLife();
+
     void togglePause();
 
     Character* m_character;
@@ -67,7 +68,12 @@ private:
 
     // 地面滚动部分
     QList<QLabel*> m_groundTiles;
-    const int GROUND_SPEED = 180;
+    const int GROUND_SPEED = 120;
     const int GROUND_TILE_HEIGHT = 80;  // 高度固定
     int m_groundTileWidth = 0;          // 宽度按比例计算，构造函数中初始化
+
+    QLabel* m_spearIcon;
+    QLabel* m_spearTimerLabel;
+    QTimer* m_spearCountdownTimer;
+    int m_spearRemainingTime = 0;
 };

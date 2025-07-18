@@ -28,6 +28,8 @@
         <file>back.png</file>
         <file>fail.png</file>
         <file>ground.png</file>
+        <file>spear.png</file>
+        <file>Spear_Dash.WAV</file>
     </qresource>
     <qresource prefix="/videos">
         <file>opening_animation.mp4</file>
@@ -40,5 +42,8 @@
         <file>mail.wav</file>
         <file>win.wav</file>
         <file>hurt.WAV</file>
+        <file>spear_pickup.WAV</file>
+        <file>magnet_pickup.WAV</file>
+        <file>Spear_Dash.WAV</file>
     </qresource>
 </RCC>

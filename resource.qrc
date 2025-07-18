@@ -1,0 +1,49 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>.jpg</file>
+        <file>again.png</file>
+        <file>an.png</file>
+        <file>aohema1.png</file>
+        <file>aohema2.png</file>
+        <file>aohema3.png</file>
+        <file>aohema4.png</file>
+        <file>back.png</file>
+        <file>bao.png</file>
+        <file>choose.png</file>
+        <file>choose_btn.png</file>
+        <file>coin.png</file>
+        <file>fail.png</file>
+        <file>ground.png</file>
+        <file>heart_gray.png</file>
+        <file>heart_red.png</file>
+        <file>letter.png</file>
+        <file>level1.png</file>
+        <file>level2.png</file>
+        <file>level3.png</file>
+        <file>level4.png</file>
+        <file>level5.png</file>
+        <file>lion_shield1.png</file>
+        <file>lion_shield2.png</file>
+        <file>mail.png</file>
+        <file>Main_background.jpg</file>
+        <file>ning.png</file>
+        <file>redcrystal.png</file>
+        <file>spear.png</file>
+        <file>succeed.png</file>
+    </qresource>
+    <qresource prefix="/sound">
+        <file>coin.wav</file>
+        <file>fail.wav</file>
+        <file>hurt.WAV</file>
+        <file>jump.wav</file>
+        <file>letter.wav</file>
+        <file>magnet_pickup.WAV</file>
+        <file>mail.wav</file>
+        <file>Spear_Dash.WAV</file>
+        <file>spear_pickup.WAV</file>
+        <file>win.wav</file>
+    </qresource>
+    <qresource prefix="/video">
+        <file>opening_animation.mp4</file>
+    </qresource>
+</RCC>

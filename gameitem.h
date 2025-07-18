@@ -53,7 +53,7 @@ protected:
     QSize m_scaledSize;
     Track m_track;
     bool  m_isActive = true;
+    QSoundEffect* m_soundEffect = nullptr;
 
     QGraphicsOpacityEffect* m_opacityEffect = nullptr;
-    QSoundEffect* m_soundEffect = nullptr;
 };

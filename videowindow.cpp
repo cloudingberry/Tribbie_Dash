@@ -21,6 +21,6 @@ void VideoWindow::playIntroVideo() {
     QAudioOutput *audioOutput = new QAudioOutput(this);
     player->setAudioOutput(audioOutput);
     audioOutput->setVolume(1.0);
-    player->setSource(QUrl("qrc:/videos/opening_animation.mp4"));
+    player->setSource(QUrl("qrc:/video/opening_animation.mp4"));
     player->play();
 }

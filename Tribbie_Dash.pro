@@ -17,6 +17,7 @@ SOURCES += \
     receiver.cpp \
     redcrystal.cpp \
     resultwindow.cpp \
+    spear.cpp \
     videowindow.cpp
 
 HEADERS += \
@@ -34,9 +35,10 @@ HEADERS += \
     receiver.h \
     redcrystal.h \
     resultwindow.h \
+    spear.h \
     videowindow.h
 
 FORMS +=
 
 RESOURCES += \
-    resources.qrc
+    resource.qrc

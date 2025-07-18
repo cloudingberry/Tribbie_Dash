@@ -30,6 +30,7 @@ private:
     QList<GameItem*> generateShieldLine();
     QList<GameItem*> generateLetterWithTrap();
     QList<GameItem*> generateLetterGuard();
+    QList<GameItem*> generateSpear();
 
     QList<GameItem*> generateGoal();
 };

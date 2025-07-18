@@ -5,6 +5,7 @@
 #include "redcrystal.h"
 #include "letter.h"
 #include "receiver.h"
+#include "spear.h"
 #include <QRandomGenerator>
 
 ItemPatternGenerator::ItemPatternGenerator(QObject* parent, GameWindow* gameWindow)
@@ -24,9 +25,9 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
 
 
     if (m_letterCount < 3) {
-        candidateTypes << 0 << 0 << 1 << 1 << 2 << 2;
+        candidateTypes << 0 << 0 << 1 << 1 << 2 << 2 << 5 << 5 << 5;
         if (spawnCounter > 5) {
-            candidateTypes << 3 << 4;
+            candidateTypes << 3 << 4 << 5;
         }
     } else {
         m_goalGenerated = true;
@@ -55,6 +56,7 @@ QList<GameItem*> ItemPatternGenerator::generatePattern(int type) {
     case 2: return generateShieldLine();
     case 3: return generateLetterWithTrap();
     case 4: return generateLetterGuard();
+    case 5: return generateSpear();
     default: return {};
     }
 }
@@ -164,5 +166,14 @@ QList<GameItem*> ItemPatternGenerator::generateGoal() {
     auto* receiver = new Receiver(m_gameWindow, track);
     receiver->move(m_gameWindow->width() + 50, m_gameWindow->trackY(track) - receiver->height() / 2);
     items.append(receiver);
+    return items;
+}
+
+QList<GameItem*> ItemPatternGenerator::generateSpear() {
+    QList<GameItem*> items;
+    auto track = static_cast<GameItem::Track>(QRandomGenerator::global()->bounded(3));
+    auto* spear = new Spear(m_gameWindow, track);
+    spear->move(m_gameWindow->width() + 50, m_gameWindow->trackY(track) - spear->height() / 2);
+    items.append(spear);
     return items;
 }

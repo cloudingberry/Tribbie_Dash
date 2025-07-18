@@ -9,8 +9,8 @@
 #include "letter.h"
 #include "redcrystal.h"
 #include "lionshield.h"
-#include "levelselectwindow.h"
 #include "resultwindow.h"
+#include "spear.h"
 #include <QTimer>
 
 GameWindow::GameWindow(int level, QWidget *parent)
@@ -22,7 +22,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
 
     int baseY = height() * 0.25;
     int spacing = height() * 0.18;
-    m_trackYPositions = { baseY, baseY + spacing, baseY + 2 * spacing };
+    m_trackYPositions = { baseY, baseY + spacing, baseY + 2 * spacing }; // 三条轨道的中心 Y 坐标
 
     initCharacter();
 
@@ -38,7 +38,11 @@ GameWindow::GameWindow(int level, QWidget *parent)
         } else if (qobject_cast<RedCrystal*>(item)) {
             loseLife();
         } else if (qobject_cast<LionShield*>(item)) {
-            emit gameFailed();
+            if (!m_character->isDashing()) {
+                emit gameFailed();
+            }
+        }else if (qobject_cast<Spear*>(item)) {
+            m_character->activateSpearMode(20);
         }
     });
 
@@ -46,12 +50,20 @@ GameWindow::GameWindow(int level, QWidget *parent)
     m_frameTimer.start();
 
     m_gameTimer = new QTimer(this);
+
+    //游戏主循环逻辑
+    //每帧执行：跳跃处理,地面滚动,所有物品移动,碰撞检测
     connect(m_gameTimer, &QTimer::timeout, this, [=]() {
         qreal deltaSec = m_frameTimer.restart() / 1000.0;
         processJump();
 
+        // 冲刺状态下速度加倍
+        qreal speedMultiplier = m_character->isDashing() ? 4.5 : 1.0;
+        int currentGroundSpeed = static_cast<int>(GROUND_SPEED * speedMultiplier);
+
+        // 地面移动
         for (QLabel* ground : m_groundTiles) {
-            int newX = ground->x() - static_cast<int>(GROUND_SPEED * deltaSec);
+            int newX = ground->x() - static_cast<int>(currentGroundSpeed * deltaSec);
             if (newX + m_groundTileWidth < 0) {
                 int rightmostX = 0;
                 for (QLabel* other : m_groundTiles)
@@ -61,12 +73,14 @@ GameWindow::GameWindow(int level, QWidget *parent)
             ground->move(newX, ground->y());
         }
 
+        // 物品移动
         for (auto* item : findChildren<GameItem*>()) {
-            item->updatePosition(deltaSec);
+            item->updatePosition(deltaSec * speedMultiplier);
         }
 
         m_collisionManager->checkCollisions(m_character->hitBox());
     });
+
     m_gameTimer->start(16);
 
     // ========== UI积分区域 ==========
@@ -150,6 +164,11 @@ GameWindow::GameWindow(int level, QWidget *parent)
         winWindow->move((width() - winWindow->width()) / 2, (height() - winWindow->height()) / 2);
         winWindow->show();
 
+        QSoundEffect* failSound = new QSoundEffect(this);
+        failSound->setSource(QUrl("qrc:/sound/fail.wav"));
+        failSound->setVolume(0.8);
+        failSound->play();
+
         connect(winWindow, &ResultWindow::retryRequested, this, [=]() {
             close();
             QTimer::singleShot(100, [=]() {
@@ -162,6 +181,40 @@ GameWindow::GameWindow(int level, QWidget *parent)
             close();
         });
     });
+
+
+    // Spear UI 初始化
+    m_spearIcon = new QLabel(this);
+    m_spearIcon->setPixmap(QPixmap(":/images/spear.png").scaled(200, 200, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    m_spearIcon->setGeometry(20, height() - 180, 200, 200);
+    m_spearIcon->hide();
+
+    m_spearTimerLabel = new QLabel(this);
+    m_spearTimerLabel->setStyleSheet("color: white; font: bold 20px;");
+    m_spearTimerLabel->setGeometry(220, height() - 70, 40, 40);
+    m_spearTimerLabel->hide();
+
+    m_spearCountdownTimer = new QTimer(this);
+    connect(m_spearCountdownTimer, &QTimer::timeout, this, [=]() {
+        m_spearRemainingTime--;
+        if (m_spearRemainingTime <= 0) {
+            m_spearCountdownTimer->stop();
+        }
+        m_spearTimerLabel->setText(QString("%1s").arg(m_spearRemainingTime));
+    });
+
+    connect(m_character, &Character::spearModeChanged, this, [=](bool active, int duration) {
+        m_spearIcon->setVisible(active);
+        m_spearTimerLabel->setVisible(active);
+        if (active) {
+            m_spearRemainingTime = duration;
+            m_spearTimerLabel->setText(QString("%1s").arg(m_spearRemainingTime));
+            m_spearCountdownTimer->start(1000);
+        } else {
+            m_spearCountdownTimer->stop();
+        }
+    });
+
 }
 
 GameWindow::~GameWindow() {
@@ -169,6 +222,7 @@ GameWindow::~GameWindow() {
     delete m_gameTimer;
 }
 
+// 将生成的游戏物品注册到碰撞检测系统中，并连接 Receiver（终点线）特殊信号
 void GameWindow::registerGameItem(GameItem* item) {
     m_collisionManager->registerItem(item);
     if (auto* receiver = qobject_cast<Receiver*>(item)) {
@@ -179,6 +233,7 @@ void GameWindow::registerGameItem(GameItem* item) {
     }
 }
 
+// 根据传入的轨道枚举类型返回对应的 Y 坐标，用于定位物体或角色
 int GameWindow::trackY(GameItem::Track track) const {
     switch (track) {
     case GameItem::Top: return m_trackYPositions[0];
@@ -190,6 +245,7 @@ int GameWindow::trackY(GameItem::Track track) const {
     }
 }
 
+// 初始化角色对象 m_character，设置默认类型为 BAO，并设置轨道坐标与偏移
 void GameWindow::initCharacter() {
     m_character = new Character(this);
     m_character->init(Character::BAO, m_trackYPositions, Y_OFFSET);
@@ -275,6 +331,10 @@ void GameWindow::keyPressEvent(QKeyEvent* event) {
     case Qt::Key_S:
         togglePause();
         break;
+    case Qt::Key_D:
+        m_character->triggerDash();
+        break;
+
     case Qt::Key_Escape:
         close();
         break;
