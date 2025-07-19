@@ -22,6 +22,7 @@ private:
     qint64 m_lastSpawnTime = 0;       // 上一次生成物品的时间
     qint64 m_minIntervalMs = 1500;    // 两次生成的最小间隔
     QVector<int> candidateTypes;      //存储当前可以选择生成的套路编号，并调整概率
+    int m_spawnCounter = 0;           // 已经生成的物品数量，控制游戏节奏
 
     int m_level = 1;
 

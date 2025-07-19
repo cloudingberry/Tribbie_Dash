@@ -22,8 +22,7 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
 
     m_lastSpawnTime = now;
 
-    static int spawnCounter = 0;
-    spawnCounter++;
+    m_spawnCounter++;
 
     if (m_letterCount < 3) {
         switch(m_level){
@@ -43,7 +42,7 @@ QList<GameItem*> ItemPatternGenerator::generateNextPattern() {
             candidateTypes << 0 << 0 << 1 << 1 << 2 << 2 << 5 << 5 << 6 << 6 << 7 << 7;
             break;
         }
-        if (spawnCounter > 10) {
+        if (m_spawnCounter > 10) {
             candidateTypes << 3 << 4;
         }
     } else {
