@@ -88,6 +88,15 @@ GameWindow::GameWindow(int level, QWidget *parent)
         // 物品移动
         for (auto* item : findChildren<GameItem*>()) {
             item->updatePosition(deltaSec * speedMultiplier);
+
+            // 检查收信人是否离开屏幕
+            if (auto* receiver = qobject_cast<Receiver*>(item)) {
+                if (receiver->x() + receiver->width() < 0) {
+                    qDebug() << "Receiver missed! Game failed.";
+                    emit gameFailed();
+                    return;  // 防止多次触发
+                }
+            }
         }
 
         m_collisionManager->checkCollisions(m_character->hitBox());
@@ -160,7 +169,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
         connect(failWindow, &ResultWindow::retryRequested, this, [=]() {
             close();
             QTimer::singleShot(100, [=]() {
-                GameWindow* newGame = new GameWindow(1);
+                GameWindow* newGame = new GameWindow(m_level);
                 newGame->show();
             });
         });
@@ -184,7 +193,7 @@ GameWindow::GameWindow(int level, QWidget *parent)
         connect(winWindow, &ResultWindow::retryRequested, this, [=]() {
             close();
             QTimer::singleShot(100, [=]() {
-                GameWindow* newGame = new GameWindow(1);
+                GameWindow* newGame = new GameWindow(m_level);
                 newGame->show();
             });
         });
