@@ -3,10 +3,6 @@
         <file>.jpg</file>
         <file>again.png</file>
         <file>an.png</file>
-        <file>aohema1.png</file>
-        <file>aohema2.png</file>
-        <file>aohema3.png</file>
-        <file>aohema4.png</file>
         <file>back.png</file>
         <file>bao.png</file>
         <file>choose.png</file>
@@ -32,6 +28,11 @@
         <file>succeed.png</file>
         <file>magnet.png</file>
         <file>speedpig.png</file>
+        <file>wfls1.png</file>
+        <file>wfls2.png</file>
+        <file>wfls3.png</file>
+        <file>wfls4.png</file>
+        <file>wfls5.png</file>
     </qresource>
     <qresource prefix="/sound">
         <file>coin.wav</file>

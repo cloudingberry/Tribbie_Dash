@@ -333,8 +333,10 @@ void GameWindow::switchCharacter(int type) {
 
 void GameWindow::paintEvent(QPaintEvent*) {
     QPainter painter(this);
-    painter.drawPixmap(rect(), QPixmap(":/images/aohema1.png"));
+    QString path = QString(":/images/wfls%1.png").arg(m_level);
+    painter.drawPixmap(rect(), QPixmap(path));
 }
+
 
 void GameWindow::closeEvent(QCloseEvent* event) {
     emit closed();

@@ -5,7 +5,7 @@
 GoldCoin::GoldCoin(QWidget* parent, Track track)
     : GameItem(parent, ":/images/coin.png", track, QSize(70, 70)) {
 
-    setSound("qrc:/sound/coin.wav", 1.0);
+    setSound("qrc:/sound/coin.wav", 2.0);
 
 }
 

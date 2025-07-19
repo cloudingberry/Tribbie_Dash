@@ -5,7 +5,7 @@ Receiver::Receiver(QWidget* parent, Track track)
 {
     setImage(":/images/mail.png");
     setScaledSize(QSize(130, 130));
-    setSound("qrc:/sound/mail.wav", 1.0);
+    setSound("qrc:/sound/mail.wav", 1.5);
 }
 
 void Receiver::onCollideWithPlayer() {

@@ -3,7 +3,7 @@
 RedCrystal::RedCrystal(QWidget* parent, Track track)
     : GameItem(parent, ":/images/redcrystal.png", track, QSize(80, 80))
 {
-    setSound("qrc:/sound/hurt.WAV", 1.0);
+    setSound("qrc:/sound/hurt.WAV", 2.0);
 }
 
 void RedCrystal::onCollideWithPlayer() {
