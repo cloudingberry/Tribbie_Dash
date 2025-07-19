@@ -5,6 +5,7 @@
 #include <QHBoxLayout>
 #include <QScrollArea>
 #include <QPixmap>
+#include <QLabel>
 #include <QDebug>
 
 LevelSelectWindow::LevelSelectWindow(QWidget *parent)
@@ -67,4 +68,7 @@ void LevelSelectWindow::setupUI() {
         height() - scrollArea->height() - 30
         );
     scrollArea->setStyleSheet("background: transparent; border: none;"); // 原始透明样式
+
+    // 基本介绍
+
 }

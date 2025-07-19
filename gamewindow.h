@@ -91,4 +91,6 @@ private:
 
     int m_level = 1;
 
+    QLabel* m_pauseOverlay = nullptr;
+
 };

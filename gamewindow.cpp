@@ -299,6 +299,16 @@ GameWindow::GameWindow(int level, QWidget *parent)
         }
     });
 
+    // 构造函数 GameWindow::GameWindow(int level, QWidget *parent) 的尾部添加：
+    m_pauseOverlay = new QLabel(this);
+    QString path = QString(":/images/pause%1.png").arg(m_level);
+    m_pauseOverlay->setPixmap(QPixmap(path).scaled(1000, 500, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    m_pauseOverlay->setGeometry((width() - 800)/2 -100 , (height() - 400) / 2, 1000, 500);  // 居中
+    m_pauseOverlay->setStyleSheet("background: transparent;");
+    m_pauseOverlay->hide();
+
+
+    togglePause(); // 默认暂停
 
 }
 
@@ -381,10 +391,12 @@ void GameWindow::togglePause() {
     if (m_isPaused) {
         m_gameTimer->stop();
         m_itemManager->pauseItems();
+        m_pauseOverlay->show(); // 显示暂停提示图
     } else {
         m_frameTimer.restart(); // 避免物品突进
         m_gameTimer->start(16);
         m_itemManager->resumeItems();
+        m_pauseOverlay->hide(); // 隐藏暂停图
     }
 }
 

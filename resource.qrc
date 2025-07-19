@@ -5,7 +5,6 @@
         <file>an.png</file>
         <file>back.png</file>
         <file>bao.png</file>
-        <file>choose.png</file>
         <file>choose_btn.png</file>
         <file>coin.png</file>
         <file>fail.png</file>
@@ -33,6 +32,14 @@
         <file>wfls3.png</file>
         <file>wfls4.png</file>
         <file>wfls5.png</file>
+        <file>introductioin01.png</file>
+        <file>introduction02.png</file>
+        <file>pause1.png</file>
+        <file>pause2.png</file>
+        <file>pause3.png</file>
+        <file>pause4.png</file>
+        <file>pause5.png</file>
+        <file>choose.png</file>
     </qresource>
     <qresource prefix="/sound">
         <file>coin.wav</file>
